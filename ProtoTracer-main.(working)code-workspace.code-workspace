@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "ProtoTracer-main",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"limits": "cpp",
+			"string": "cpp",
+			"cmath": "cpp",
+			"initializer_list": "cpp"
+		},
+		"platformio-ide.useDevelopmentPIOCore": true
+	}
+}
