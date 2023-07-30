@@ -6,6 +6,8 @@
 #include "..\Materials\Animated\RainbowNoise.h"
 #include "..\Materials\Menu\TextEngine.h"
 
+
+
 class Menu{
 public:
     enum MenuState{
@@ -102,6 +104,7 @@ public:
 
         MenuHandler<menuCount>::Begin();
         isSecondary = false;
+        Menu::faceState = 0;
     }
 
     static void Initialize(uint8_t faceCount, Vector2D size = Vector2D(240, 50)){
@@ -281,7 +284,7 @@ public:
     }
 
     static void SetBrightness(uint8_t bright){
-        Menu::bright = bright;
+        Menu::bright = 8;
     }
 
      static uint8_t GetBrightness(){
@@ -321,8 +324,7 @@ public:
     }
 
     static uint8_t UseBoopSensor(){
-        if(isSecondary) return boopSensor;
-        else return MenuHandler<menuCount>::GetMenuValue(BoopSensor);
+        return true;
     }
 
     static void SetMirrorSpectrumAnalyzer(uint8_t spectrumMirror){

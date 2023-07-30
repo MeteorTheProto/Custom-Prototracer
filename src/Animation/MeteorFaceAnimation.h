@@ -4,6 +4,7 @@
 #include "KeyFrameTrack.h"
 #include "EasyEaseAnimator.h"
 #include "..\Objects\Background.h"
+
 #include "..\Morph\MeteorEye.h"
 #include "..\Morph\MeteorFace.h"
 
@@ -14,7 +15,10 @@
 #include "..\Render\Scene.h"
 #include "..\Signals\FunctionGenerator.h"
 #include "..\Menu\SingleButtonMenu.h"
-#include "..\Sensors\APDS9960.h"
+
+
+#include "..\Sensors\APDS9960sparkfun.h"
+//#include "..\Sensors\APDS9960.h"
 
 #include "..\Materials\Animated\SpectrumAnalyzer.h"
 #include "..\Materials\Animated\RainbowNoise.h"
@@ -30,22 +34,26 @@
 
 //#include "..\Flash\ImageSequences\VaporWave.h"
 
+#include "..\Sensors\SerialSync.h"
 
 
-class MeteorFaceAnimation : public Animation<4> {
+
+class MeteorFaceAnimation : public Animation<5> {
 private:
 
     Background background;
-
     MeteorFace face;
     MeteorEye eye;
     MeteorBrow brow;
-    //MeteorBlush blush;
+    MeteorBlush blush;
     
     
    
 
-    EasyEaseAnimator<22> eEA = EasyEaseAnimator<22>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
+    EasyEaseAnimator<18> eEAface = EasyEaseAnimator<18>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
+    EasyEaseAnimator<3> eEAeye = EasyEaseAnimator<3>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
+    EasyEaseAnimator<5> eEAbrow = EasyEaseAnimator<5>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
+    EasyEaseAnimator<4> eEAblush = EasyEaseAnimator<4>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
 
     //Materials
     RainbowNoise rainbowNoise;
@@ -76,7 +84,8 @@ private:
     FunctionGenerator fGenMatXMove = FunctionGenerator(FunctionGenerator::Sine, -0.5f, 0.5f, 2.3f);
     FunctionGenerator fGenMatYMove = FunctionGenerator(FunctionGenerator::Sine, -0.5f, 0.5f, 3.7f);
 
-    APDS9960 boop;
+    APDS9960SPK boop;
+    //SerialSync serialCom;
     float rainbowFaceMix = 0.0f;
     float angryFaceMix = 0.0f;
     uint8_t rainbowFaceIndex = 50;
@@ -96,41 +105,52 @@ private:
        //eEA.AddParameter(brow.GetMorphWeightReference(MeteorBrow::blink), MeteorBrow::blink, 60, 0.0f, 1.0f);
        //eEA.AddParameter(brow.GetMorphWeightReference(MeteorBrow::Default), MeteorBrow::Default, 1, 1.0f, 0.0f);
        
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::Anger), MeteorFace::Anger, 60, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::Sadness), MeteorFace::Sadness, 60, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::Surprised), MeteorFace::Surprised, 60, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::Doubt), MeteorFace::Doubt, 60, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::Frown), MeteorFace::Frown, 60, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::LookUp), MeteorFace::LookUp, 60, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::LookDown), MeteorFace::LookDown, 60, 0.0f, 1.0f);
+       eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::Anger), MeteorFace::Anger, 60, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::Sadness), MeteorFace::Sadness, 60, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::Surprised), MeteorFace::Surprised, 60, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::Doubt), MeteorFace::Doubt, 60, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::Frown), MeteorFace::Frown, 60, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::LookUp), MeteorFace::LookUp, 60, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::LookDown), MeteorFace::LookDown, 60, 0.0f, 1.0f);
 
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_ee), MeteorFace::vrc_v_ee, 2, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_ih), MeteorFace::vrc_v_ih, 2, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_dd), MeteorFace::vrc_v_dd, 2, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_rr), MeteorFace::vrc_v_rr, 2, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_ch), MeteorFace::vrc_v_ch, 2, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_aa), MeteorFace::vrc_v_aa, 2, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_oh), MeteorFace::vrc_v_oh, 2, 0.0f, 1.0f);
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_ss), MeteorFace::vrc_v_ss, 2, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_ee), MeteorFace::vrc_v_ee, 2, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_ih), MeteorFace::vrc_v_ih, 2, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_dd), MeteorFace::vrc_v_dd, 2, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_rr), MeteorFace::vrc_v_rr, 2, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_ch), MeteorFace::vrc_v_ch, 2, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_aa), MeteorFace::vrc_v_aa, 2, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_oh), MeteorFace::vrc_v_oh, 2, 0.0f, 1.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::vrc_v_ss), MeteorFace::vrc_v_ss, 2, 0.0f, 1.0f);
         
         
-        eEA.AddParameter(face.GetMorphWeightReference(MeteorFace::HideBlush), MeteorFace::HideBlush, 30, 1.0f, 0.0f);
+        eEAface.AddParameter(face.GetMorphWeightReference(MeteorFace::HideBlush), MeteorFace::HideBlush, 30, 1.0f, 0.0f);
+        eEAblush.AddParameter(blush.GetMorphWeightReference(MeteorBlush::Default), MeteorBlush::Default, 30, 1.0f, 0.0f);
+        eEAblush.AddParameter(blush.GetMorphWeightReference(MeteorBlush::MoveBlush), MeteorBlush::MoveBlush, 30, 1.0f, 0.0f);
 
-         eEA.AddParameter(eye.GetMorphWeightReference(MeteorEye::Closed), MeteorEye::Closed, 60, 0.0f, 1.0f);
+         eEAeye.AddParameter(eye.GetMorphWeightReference(MeteorEye::Closed), MeteorEye::Closed, 60, 0.0f, 1.0f);
 
-         eEA.AddParameter(brow.GetMorphWeightReference(MeteorBrow::Angry), MeteorBrow::Angry, 60, 0.0f, 1.0f);
-       eEA.AddParameter(brow.GetMorphWeightReference(MeteorBrow::Surprise), MeteorBrow::Surprise, 60, 0.0f, 1.0f);
-       eEA.AddParameter(brow.GetMorphWeightReference(MeteorBrow::Sad), MeteorBrow::Sad, 60, 0.0f, 1.0f);
-        //eEA.AddParameter(blush.GetMorphWeightReference(MeteorBlush::MoveBlush), MeteorBlush::MoveBlush, 30, 1.0f, 0.0f);
-
-
-        //eEA.AddParameter(blush.GetMorphWeightReference(MeteorBlush::MoveBlush), MeteorBlush::MoveBlush, 30, 1.0f, 0.0f);
-
+       eEAbrow.AddParameter(brow.GetMorphWeightReference(MeteorBrow::Angry), MeteorBrow::Angry, 60, 0.0f, 1.0f);
+       eEAbrow.AddParameter(brow.GetMorphWeightReference(MeteorBrow::Surprise), MeteorBrow::Surprise, 60, 0.0f, 1.0f);
+       eEAbrow.AddParameter(brow.GetMorphWeightReference(MeteorBrow::Sad), MeteorBrow::Sad, 60, 0.0f, 1.0f);
+        //eEAblush.AddParameter(blush.GetMorphWeightReference(MeteorBlush::MoveBlush), MeteorBlush::MoveBlush, 30, 1.0f, 0.0f);
 
 
+        //eEAblush.AddParameter(blush.GetMorphWeightReference(MeteorBlush::MoveBlush), MeteorBlush::MoveBlush, 30, 1.0f, 0.0f);
 
-        eEA.AddParameter(&rainbowFaceMix, rainbowFaceIndex, 50, 0.0f, 1.0f);
-        eEA.AddParameter(&angryFaceMix, angryFaceIndex, 40, 0.0f, 1.0f);
+
+
+
+        eEAface.AddParameter(&rainbowFaceMix, rainbowFaceIndex, 50, 0.0f, 1.0f);
+        eEAface.AddParameter(&angryFaceMix, angryFaceIndex, 40, 0.0f, 1.0f);
+
+        eEAeye.AddParameter(&rainbowFaceMix, rainbowFaceIndex, 50, 0.0f, 1.0f);
+        eEAeye.AddParameter(&angryFaceMix, angryFaceIndex, 40, 0.0f, 1.0f);
+
+        eEAbrow.AddParameter(&rainbowFaceMix, rainbowFaceIndex, 50, 0.0f, 1.0f);
+        eEAbrow.AddParameter(&angryFaceMix, angryFaceIndex, 40, 0.0f, 1.0f);
+ //blush
+        eEAblush.AddParameter(&rainbowFaceMix, rainbowFaceIndex, 50, 0.0f, 1.0f);
+        eEAblush.AddParameter(&angryFaceMix, angryFaceIndex, 40, 0.0f, 1.0f);
         
     }
 
@@ -141,20 +161,33 @@ private:
 
     void ChangeInterpolationMethods(){
         
-        //eEA.SetInterpolationMethod(MeteorBlush::MoveBlush, EasyEaseInterpolation::Cosine);
-        eEA.SetInterpolationMethod(MeteorFace::Sadness, EasyEaseInterpolation::Cosine);
+        eEAblush.SetInterpolationMethod(MeteorBlush::MoveBlush, EasyEaseInterpolation::Cosine);
+        eEAface.SetInterpolationMethod(MeteorFace::Sadness, EasyEaseInterpolation::Cosine);
         
-        eEA.SetInterpolationMethod(rainbowFaceIndex, EasyEaseInterpolation::Cosine);
-        eEA.SetInterpolationMethod(angryFaceIndex, EasyEaseInterpolation::Cosine);
+        eEAface.SetInterpolationMethod(rainbowFaceIndex, EasyEaseInterpolation::Cosine);
+        eEAface.SetInterpolationMethod(angryFaceIndex, EasyEaseInterpolation::Cosine);
+
+        eEAeye.SetInterpolationMethod(rainbowFaceIndex, EasyEaseInterpolation::Cosine);
+        eEAeye.SetInterpolationMethod(angryFaceIndex, EasyEaseInterpolation::Cosine);
+        eEAbrow.SetInterpolationMethod(rainbowFaceIndex, EasyEaseInterpolation::Cosine);
+        eEAbrow.SetInterpolationMethod(angryFaceIndex, EasyEaseInterpolation::Cosine);
+        eEAblush.SetInterpolationMethod(rainbowFaceIndex, EasyEaseInterpolation::Cosine);
+        eEAblush.SetInterpolationMethod(angryFaceIndex, EasyEaseInterpolation::Cosine);
+
+
+
+
+
+
        
-        eEA.SetInterpolationMethod(MeteorFace::vrc_v_ee, EasyEaseInterpolation::Linear);
-        eEA.SetInterpolationMethod(MeteorFace::vrc_v_ih, EasyEaseInterpolation::Linear);
-        eEA.SetInterpolationMethod(MeteorFace::vrc_v_dd, EasyEaseInterpolation::Linear);
-        eEA.SetInterpolationMethod(MeteorFace::vrc_v_rr, EasyEaseInterpolation::Linear);
-        eEA.SetInterpolationMethod(MeteorFace::vrc_v_ch, EasyEaseInterpolation::Linear);
-        eEA.SetInterpolationMethod(MeteorFace::vrc_v_aa, EasyEaseInterpolation::Linear);
-        eEA.SetInterpolationMethod(MeteorFace::vrc_v_oh, EasyEaseInterpolation::Linear);
-        eEA.SetInterpolationMethod(MeteorFace::vrc_v_ss, EasyEaseInterpolation::Linear);
+        eEAface.SetInterpolationMethod(MeteorFace::vrc_v_ee, EasyEaseInterpolation::Linear);
+        eEAface.SetInterpolationMethod(MeteorFace::vrc_v_ih, EasyEaseInterpolation::Linear);
+        eEAface.SetInterpolationMethod(MeteorFace::vrc_v_dd, EasyEaseInterpolation::Linear);
+        eEAface.SetInterpolationMethod(MeteorFace::vrc_v_rr, EasyEaseInterpolation::Linear);
+        eEAface.SetInterpolationMethod(MeteorFace::vrc_v_ch, EasyEaseInterpolation::Linear);
+        eEAface.SetInterpolationMethod(MeteorFace::vrc_v_aa, EasyEaseInterpolation::Linear);
+        eEAface.SetInterpolationMethod(MeteorFace::vrc_v_oh, EasyEaseInterpolation::Linear);
+        eEAface.SetInterpolationMethod(MeteorFace::vrc_v_ss, EasyEaseInterpolation::Linear);
         
     }
 
@@ -189,12 +222,14 @@ private:
 
 public:
     MeteorFaceAnimation() {
+        boop.Initialize(200);
+        Serial.print("boop init?");
       scene.AddObject(background.GetObject());
       
       scene.AddObject(eye.GetObject());  
       scene.AddObject(face.GetObject());
       scene.AddObject(brow.GetObject());
-      //scene.AddObject(blush.GetObject());
+      scene.AddObject(blush.GetObject());
         
         
 
@@ -207,16 +242,17 @@ public:
         SetMaterials();
 
        eye.GetObject()->SetMaterial(&faceMaterial); 
-       //blush.GetObject()->SetMaterial(&pink); 
+       blush.GetObject()->SetMaterial(&pink); 
        face.GetObject()->SetMaterial(&faceMaterial);
        brow.GetObject()->SetMaterial(&faceMaterial);
         background.GetObject()->SetMaterial(&sA);
 
-        Menu::Initialize(9,0, 1000);//faces, pin, holding time
-
+        Menu::Initialize(8,0, 1000);//faces, pin, holding time
+         //Menu::SetBrightness(8);
         MicrophoneFourierIT::Initialize(A8, 8000, 50.0f, 82.5f);//8KHz sample rate, 50dB min, 120dB max (original)
         
-        boop.Initialize(600);
+        //boop.Initialize(200);
+        //serialCom.Initialize();
 
         
     }
@@ -240,10 +276,10 @@ uint8_t GetAccentBrightness(){
      face.GetObject()->SetMaterial(&faceMaterial);
      brow.GetObject()->SetMaterial(&faceMaterial);
      
-     //eEA.AddParameterFrame(MeteorBlush::MoveBlush, 1.0f);
-     //eEA.AddParameterFrame(MeteorBlush::Default, 0.0f);
-     //blush.GetObject()->SetMaterial(&pink);
-     //eEA.AddParameterFrame(MeteorBlush::MoveBlush, 1.0f);
+     eEAblush.AddParameterFrame(MeteorBlush::MoveBlush, 1.0f);
+     eEAblush.AddParameterFrame(MeteorBlush::Default, 0.0f);
+    blush.GetObject()->SetMaterial(&pink);
+    //eEA.AddParameterFrame(MeteorBlush::MoveBlush, 1.0f);
      //eEA.AddParameterFrame(MeteorFace::BiggerNose, 1.0f);
     }
 
@@ -253,8 +289,8 @@ uint8_t GetAccentBrightness(){
      face.GetObject()->SetMaterial(&faceMaterial);
      brow.GetObject()->SetMaterial(&faceMaterial);
 
-     //eEA.AddParameterFrame(MeteorBlush::MoveBlush, 0.0f);
-     //blush.GetObject()->SetMaterial(&pink);
+     eEAblush.AddParameterFrame(MeteorBlush::MoveBlush, 0.0f);
+     blush.GetObject()->SetMaterial(&pink);
      //eEA.AddParameterFrame(MeteorBlush::MoveBlush, 0.0f);
      //eEA.AddParameterFrame(MeteorFace::BiggerNose, 1.0f);
     }
@@ -265,8 +301,8 @@ uint8_t GetAccentBrightness(){
         face.GetObject()->SetMaterial(&redMaterial); 
         brow.GetObject()->SetMaterial(&redMaterial); 
         
-        eEA.AddParameterFrame(MeteorFace::Anger, 1.0f);
-        eEA.AddParameterFrame(MeteorBrow::Angry, 1.0f);
+        eEAface.AddParameterFrame(MeteorFace::Anger, 1.0f);
+        eEAbrow.AddParameterFrame(MeteorBrow::Angry, 1.0f);
     }
 
     void Sad(){
@@ -277,8 +313,8 @@ uint8_t GetAccentBrightness(){
         face.GetObject()->SetMaterial(&blue);
         brow.GetObject()->SetMaterial(&blue);
 
-        eEA.AddParameterFrame(MeteorFace::Sadness, 1.0f);
-        eEA.AddParameterFrame(MeteorBrow::Sad, 1.0f);
+        eEAface.AddParameterFrame(MeteorFace::Sadness, 1.0f);
+        eEAbrow.AddParameterFrame(MeteorBrow::Sad, 1.0f);
     }
 
     void BoopFace(){
@@ -287,13 +323,18 @@ uint8_t GetAccentBrightness(){
         
         //eEA.AddParameterFrame(MeteorFace::HideBlush, 0.0f);
         //blush.GetObject()->Enable();
-            eye.GetObject()->SetMaterial(&faceMaterial);
-            face.GetObject()->SetMaterial(&faceMaterial);
-            brow.GetObject()->SetMaterial(&faceMaterial);
+            eye.GetObject()->SetMaterial(&rainbowSpiral);
+            face.GetObject()->SetMaterial(&rainbowSpiral);
+            brow.GetObject()->SetMaterial(&rainbowSpiral);
 
-        eEA.AddParameterFrame(angryFaceIndex, 0.7f);
-        eEA.AddParameterFrame(MeteorFace::Surprised, 1.0f);
-        eEA.AddParameterFrame(MeteorBrow::Surprise, 1.0f);
+        //eEAbrow.AddParameterFrame(rainbowFaceIndex, 0.7f);
+        //eEAface.AddParameterFrame(angryFaceIndex, 0.7f);
+        //eEAeye.AddParameterFrame(angryFaceIndex, 0.7f);
+        //eEAblush.AddParameterFrame(angryFaceIndex, 0.7f);
+
+
+        eEAface.AddParameterFrame(MeteorFace::Surprised, 1.0f);
+        eEAbrow.AddParameterFrame(MeteorBrow::Surprise, 1.0f);
     }
 
     void Surprised(){
@@ -304,8 +345,8 @@ uint8_t GetAccentBrightness(){
         face.GetObject()->SetMaterial(&purple);
         brow.GetObject()->SetMaterial(&purple);
 
-        eEA.AddParameterFrame(MeteorFace::Surprised, 1.0f);
-        eEA.AddParameterFrame(MeteorBrow::Surprise, 1.0f);
+        eEAface.AddParameterFrame(MeteorFace::Surprised, 1.0f);
+        eEAbrow.AddParameterFrame(MeteorBrow::Surprise, 1.0f);
     }
     
     void Sleepy(){
@@ -315,8 +356,8 @@ uint8_t GetAccentBrightness(){
         face.GetObject()->SetMaterial(&darkblue);
 
         //blink.Pause();
-        eEA.AddParameterFrame(MeteorFace::Doubt, 1.0f);
-        eEA.AddParameterFrame(MeteorBrow::Sad,0.8f);
+        eEAface.AddParameterFrame(MeteorFace::Doubt, 1.0f);
+        eEAbrow.AddParameterFrame(MeteorBrow::Sad,0.8f);
         //eEA.AddParameterFrame(Meteoreye::Closed, 0.9f);
         //background.GetObject()->Enable();
         //background.GetObject()->SetMaterial(&gif);
@@ -330,11 +371,11 @@ uint8_t GetAccentBrightness(){
     }
 
     void LookUp(){
-        eEA.AddParameterFrame(MeteorFace::LookUp, 1.0f);
+        //eEA.AddParameterFrame(MeteorFace::LookUp, 1.0f);
     }
 
     void LookDown(){
-        eEA.AddParameterFrame(MeteorFace::LookDown, 1.0f);
+        //eEA.AddParameterFrame(MeteorFace::LookDown, 1.0f);
     }
 
  void SpectrumAnalyzerWithFace(){
@@ -355,7 +396,7 @@ uint8_t GetAccentBrightness(){
         face.GetObject()->Disable();
         eye.GetObject()->Disable();
         brow.GetObject()->Disable();
-        //blush.GetObject()->Disable();
+        blush.GetObject()->Disable();
         background.GetObject()->Enable();
         background.GetObject()->SetMaterial(&sA);
     }
@@ -368,27 +409,27 @@ uint8_t GetAccentBrightness(){
         return face.GetObject();
         return eye.GetObject();
         return brow.GetObject();
-        //return blush.GetObject();
+        return blush.GetObject();
         return background.GetObject();
         
     }
 
     void UpdateFFTVisemes(){
         if(Menu::UseMicrophone()){
-            eEA.AddParameterFrame(MeteorFace::vrc_v_ss, MicrophoneFourierIT::GetCurrentMagnitude() / 2.0f);
+            eEAface.AddParameterFrame(MeteorFace::vrc_v_ss, MicrophoneFourierIT::GetCurrentMagnitude() / 2.0f);
 
             if(MicrophoneFourierIT::GetCurrentMagnitude() > 0.05f){
                 voiceDetection.Update(MicrophoneFourierIT::GetFourierFiltered(), MicrophoneFourierIT::GetSampleRate());
         
-                eEA.AddParameterFrame(MeteorFace::vrc_v_ee, voiceDetection.GetViseme(voiceDetection.EE));
-                eEA.AddParameterFrame(MeteorFace::vrc_v_ih, voiceDetection.GetViseme(voiceDetection.IH));
-               eEA.AddParameterFrame(MeteorFace::vrc_v_dd, voiceDetection.GetViseme(voiceDetection.DD));
-               eEA.AddParameterFrame(MeteorFace::vrc_v_rr, voiceDetection.GetViseme(voiceDetection.AR));
-               eEA.AddParameterFrame(MeteorFace::vrc_v_ch, voiceDetection.GetViseme(voiceDetection.ER));
-                eEA.AddParameterFrame(MeteorFace::vrc_v_aa, voiceDetection.GetViseme(voiceDetection.AH));
-                eEA.AddParameterFrame(MeteorFace::vrc_v_oh, voiceDetection.GetViseme(voiceDetection.OO));
+                eEAface.AddParameterFrame(MeteorFace::vrc_v_ee, voiceDetection.GetViseme(voiceDetection.EE));
+                eEAface.AddParameterFrame(MeteorFace::vrc_v_ih, voiceDetection.GetViseme(voiceDetection.IH));
+               eEAface.AddParameterFrame(MeteorFace::vrc_v_dd, voiceDetection.GetViseme(voiceDetection.DD));
+               eEAface.AddParameterFrame(MeteorFace::vrc_v_rr, voiceDetection.GetViseme(voiceDetection.AR));
+               eEAface.AddParameterFrame(MeteorFace::vrc_v_ch, voiceDetection.GetViseme(voiceDetection.ER));
+                eEAface.AddParameterFrame(MeteorFace::vrc_v_aa, voiceDetection.GetViseme(voiceDetection.AH));
+                eEAface.AddParameterFrame(MeteorFace::vrc_v_oh, voiceDetection.GetViseme(voiceDetection.OO));
             }
-            voiceDetection.PrintVisemes();
+            //voiceDetection.PrintVisemes();
         }
     }
 
@@ -403,16 +444,21 @@ uint8_t GetAccentBrightness(){
         eye.Reset();
         eye.GetObject()->Enable();
 
-       //blush.Reset();
-        //blush.GetObject()->Enable();
+       blush.Reset();
+        blush.GetObject()->Enable();
 
         brow.Reset();
         brow.GetObject()->Enable();
 
         background.GetObject()->Disable();
 
-        bool isBooped = Menu::UseBoopSensor() ? boop.isBooped() : 0;
+        bool isBooped = boop.isBooped();
         uint8_t mode = Menu::GetFaceState();//change by button press
+        //serialCom.SetMode(mode);
+        //serialCom.Send();
+        //Serial.print("Sent!");
+        //Serial.println(mode);
+
 
         MicrophoneFourierIT::Update();
         sA.Update(MicrophoneFourierIT::GetFourierFiltered());
@@ -445,17 +491,20 @@ uint8_t GetAccentBrightness(){
         //face.SetMorphWeight(MeteorFace::BiggerNose, 1.0f);
         face.SetMorphWeight(MeteorFace::MoveEye, 1.0f);
 
-        eEA.Update();
+        eEAface.Update();
+        eEAeye.Update();
+        eEAbrow.Update();
+       eEAblush.Update();
         face.Update();
         eye.Update();
         brow.Update();
-        // blush.Update();
+        blush.Update();
         
         rainbowNoise.Update(ratio);
         rainbowSpiral.Update(ratio);
     
-        faceMaterial.SetOpacity(2, rainbowFaceMix);//set face to spiral
-        faceMaterial.SetOpacity(3, angryFaceMix);//set face to angry
+        faceMaterial.SetOpacity(3, rainbowFaceMix);//set face to spiral
+        faceMaterial.SetOpacity(4, angryFaceMix);//set face to angry
         float x = int(sinf(ratio * 3.14159f / 180.0f * 360.0f * 1.0f) * 2.0f) * 5;
         float y = int(cosf(ratio * 3.14159f / 180.0f * 360.0f * 1.5f) * 2.0f) * 5;
 
@@ -487,11 +536,11 @@ uint8_t GetAccentBrightness(){
         brow.GetObject()->UpdateTransform();
         //blush.GetObject()->GetTransform()->SetScale(Vector3D(-0.85f, 0.60f, 0.7f));
 
-        /**/
- //blush.GetObject()->GetTransform()->SetPosition(Vector3D(125.0f-45/*fGenMatXMove.Update()*/,-10.1f/* -15.0f + fGenMatYMove.Update()*/, 300.0f));
- //blush.GetObject()->GetTransform()->SetScale(Vector3D(-0.85f, 0.60f, 0.7f));
+        
+ blush.GetObject()->GetTransform()->SetPosition(Vector3D(125.0f-45/*fGenMatXMove.Update()*/,-10.1f/* -15.0f + fGenMatYMove.Update()*/, 300.0f));
+ blush.GetObject()->GetTransform()->SetScale(Vector3D(-0.85f, 0.60f, 0.7f));
 
-//blush.GetObject()->UpdateTransform();
+blush.GetObject()->UpdateTransform();
 
 
         background.GetObject()->GetTransform()->SetPosition(Vector3D(0.0f/*fGenMatXMove.Update()*/,0.0f/* -15.0f*fGenMatYMove.Update()*/, 100.0f));

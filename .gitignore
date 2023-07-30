@@ -6,3 +6,12 @@
 .pio/build/*/*/
 .pio/build/*/*/*/
 src/Morph/Commissions
+src\Morph\MeteorFace.h
+src\Morph\MeteorBrow.h
+src\Morph\MeteorEye.h
+src\Morph\MeteorBlush.h
+src\Materials\Animated\SpectrumAnalyzerMeteor.h
+src\Materials\Animated\MeteorSpiral.h
+src\Controllers\Meteor(KBV1D1)Controller.h
+src\Animation\ProtogenKitFaceAnimation.h
+src\Animation\MeteorFaceAnimation.h

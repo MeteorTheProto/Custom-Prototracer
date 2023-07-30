@@ -29,8 +29,8 @@ private:
 
 public:
     static void Initialize(){
-        Serial4.begin(115200);
-        dataTransfer.begin(Serial4, false);//_debug = true
+        Serial4.begin(9600);
+        dataTransfer.begin(Serial4, true);//_debug = true
     }
 
     static float GetRatio(){

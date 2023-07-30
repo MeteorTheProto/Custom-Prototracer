@@ -19,7 +19,7 @@ private:
     bool flipY = false;
     bool bounce = false;
     
-    RGBColor rainbowSpectrum[6] = {RGBColor(255, 0, 0), RGBColor(255, 255, 0), RGBColor(0, 255, 0), RGBColor(0, 255, 255), RGBColor(0, 0, 255), RGBColor(255, 0, 255)};
+   RGBColor rainbowSpectrum[6] = {RGBColor(255, 0, 0), RGBColor(255, 255, 0), RGBColor(0, 255, 0), RGBColor(0, 255, 255), RGBColor(0, 0, 255), RGBColor(255, 0, 255)};
     GradientMaterial<6> gM = GradientMaterial<6>(rainbowSpectrum, 1.0f, false);
 
     Material* material;

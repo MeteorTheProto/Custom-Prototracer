@@ -13,7 +13,7 @@
 #include "..\Render\Scene.h"
 #include "..\Signals\FunctionGenerator.h"
 #include "..\Menu\SingleButtonMenu.h"
-#include "..\Sensors\APDS9960.h"
+#include "..\Sensors\APDS9960sparkfun.h"
 
 #include "..\Materials\Animated\SpectrumAnalyzer.h"
 #include "..\Materials\Animated\RainbowNoise.h"

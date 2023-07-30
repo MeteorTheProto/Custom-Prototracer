@@ -59,14 +59,14 @@ uint8_t expression;
             if (i < 346){
                 offset = i + 225;
 
-                leds.setPixel(i + 346 * 4, camLeftPixels.GetColor(offset)->R, camLeftPixels.GetColor(offset)->G, camLeftPixels.GetColor(offset)->B);//group 4
-                leds.setPixel(i + 346 * 5, camRghtPixels.GetColor(i)->R, camRghtPixels.GetColor(i)->G, camRghtPixels.GetColor(i)->B);//group 5
+                leds.setPixel(i + 346 * 2, camLeftPixels.GetColor(offset)->R, camLeftPixels.GetColor(offset)->G, camLeftPixels.GetColor(offset)->B);//group 2/ pin 7/ left back
+                leds.setPixel(i + 346 * 3, camRghtPixels.GetColor(i)->R, camRghtPixels.GetColor(i)->G, camRghtPixels.GetColor(i)->B);//group 3 /pin8/ right back
             }
             else{
                 offset = i - 346;
 
-                leds.setPixel(i + 346 * 0 - 346, camLeftPixels.GetColor(offset)->R, camLeftPixels.GetColor(offset)->G, camLeftPixels.GetColor(offset)->B);//group 0
-                leds.setPixel(i + 346 * 7 - 346, camRghtPixels.GetColor(i)->R, camRghtPixels.GetColor(i)->G, camRghtPixels.GetColor(i)->B);//Pin 8
+                leds.setPixel(i + 346 * 0 - 346, camLeftPixels.GetColor(offset)->R, camLeftPixels.GetColor(offset)->G, camLeftPixels.GetColor(offset)->B);//group 0 /pin 2 /left front
+                leds.setPixel(i + 346 * 1 - 346, camRghtPixels.GetColor(i)->R, camRghtPixels.GetColor(i)->G, camRghtPixels.GetColor(i)->B);//group 1 / pin 14/ right front
             }
         }
 

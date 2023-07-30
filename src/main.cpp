@@ -25,14 +25,16 @@
 //#include "Controllers\KaiborgV1Controller.h"
 #include "Controllers\altPins-KBV1D1.h"
 //#include "Controllers\ProtoDRController.h"
-#include "Animation\ProtogenKitFaceAnimation.h"
+
+//#include "Controllers\Meteor(KBV1D1)Controller.h"
+//#include "Animation\ProtogenKitFaceAnimation.h"
 
 
 
 //#include "Signals\FFTVoiceDetection.h"
 
 
-uint8_t maxBrightness = 50;
+uint8_t maxBrightness = 80;
 
 /* #ifdef RIGHTFACE
 ProtoDRController controller = ProtoDRController(maxBrightness, ProtoDRController::RIGHT);
@@ -40,17 +42,19 @@ ProtoDRController controller = ProtoDRController(maxBrightness, ProtoDRControlle
 ProtoDRController controller = ProtoDRController(maxBrightness, ProtoDRController::LEFT);
 #endif
 */
+#include "Animation\protokitStandard.h"
+//KaiborgV1D1Controller controller = KaiborgV1D1Controller(maxBrightness);
+ProtogenKitFaceAnimation animation = ProtogenKitFaceAnimation();
+
+
+//#include "Controllers\KaiborgV1D1Controller.h"
+//#include "Animation\MeteorFaceAnimation.h"
 KaiborgV1D1Controller controller = KaiborgV1D1Controller(maxBrightness);
- ProtogenKitFaceAnimation animation = ProtogenKitFaceAnimation();
-/*
-#include "Controllers\KaiborgV1D1Controller.h"
-#include "Animation\MeteorFaceAnimation.h"
-KaiborgV1D1Controller controller = KaiborgV1D1Controller(maxBrightness);
-MeteorFaceAnimation animation = MeteorFaceAnimation();
-*/
+//MeteorFaceAnimation animation = MeteorFaceAnimation();
+
 void setup() {
     Serial.begin(115200);
-    //Serial.println("\nStarting...");
+    Serial.println("\nStarting...");
 
     controller.Initialize();
 }
