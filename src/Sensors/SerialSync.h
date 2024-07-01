@@ -30,7 +30,7 @@ private:
 public:
     static void Initialize(){
         Serial4.begin(9600);
-        dataTransfer.begin(Serial4, true);//_debug = true
+        dataTransfer.begin(Serial4, true, Serial);//_debug = true
     }
 
     static float GetRatio(){

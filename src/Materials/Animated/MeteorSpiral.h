@@ -4,14 +4,14 @@
 #include "..\..\Signals\FunctionGenerator.h"
 #include "..\..\Materials\SpiralMaterial.h"
 
-class RainbowSpiral : public AnimatedMaterial{
+class MeteorSpiral : public AnimatedMaterial{
 private:
     FunctionGenerator fGenMatBend = FunctionGenerator(FunctionGenerator::Sine, 0.8f, 0.9f, 6.7f);
      RGBColor rainbowSpectrum[6] = {RGBColor(252, 3, 98), RGBColor(112, 146, 190), RGBColor(181, 230, 29), RGBColor(166, 75, 168), RGBColor(23, 255, 243), RGBColor(255, 255, 128)};
     SpiralMaterial spiralMaterial = SpiralMaterial(6, rainbowSpectrum, 3.0f, 7.0f);
 
 public:
-    RainbowSpiral(){}
+    MeteorSpiral(){}
 
     void Update(float ratio){
         spiralMaterial.SetBend(fGenMatBend.Update());

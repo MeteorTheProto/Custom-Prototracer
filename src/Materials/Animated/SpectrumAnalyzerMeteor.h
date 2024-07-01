@@ -4,7 +4,7 @@
 #include "..\GradientMaterial.h"
 #include "..\..\Controls\BouncePhysics.h"
 
-class SpectrumAnalyzer : public Material {
+class SpectrumAnalyzerMeteor : public Material {
 private:
     BouncePhysics* bPhy[128];
     Vector2D size;
@@ -25,7 +25,7 @@ private:
     Material* material;
 
 public:
-    SpectrumAnalyzer(Vector2D size, Vector2D offset, bool bounce = false, bool flipY = false, bool mirrorY = false){
+    SpectrumAnalyzerMeteor(Vector2D size, Vector2D offset, bool bounce = false, bool flipY = false, bool mirrorY = false){
         this->size = size.Divide(2.0f);
         this->offset = offset;
         this->mirrorY = mirrorY;
@@ -40,7 +40,7 @@ public:
         }
     }
 
-    ~SpectrumAnalyzer(){
+    ~SpectrumAnalyzerMeteor(){
         for (uint8_t i = 0; i < 128; i++){
             delete bPhy[i];
         }

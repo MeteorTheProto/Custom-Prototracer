@@ -5,17 +5,11 @@
 #include "Render/Camera.h"
 #include "Flash/PixelGroups/KaiborgV1Pixels.h"
 #include "..\Sensors\APDS9960.h"
-//#include "..\Render\PixelGroup.h"
+
 #include "..\Menu\SingleButtonMenu.h"
 
-/*
-#include <Arduino.h>
-#include <OctoWS2811.h>
+#include "..\Sensors\SerialSync.h"
 
-#include "Controller.h"
-#include "Render/Camera.h"
-#include "Flash/PixelGroups/KaiborgV1Pixels.h"
-*/
 const int ledsPerStrip = 346;
 DMAMEM int displayMemory[346 * 6];
 int drawingMemory[346 * 6];
@@ -41,7 +35,7 @@ private:
 
 public:
     KaiborgV1D1Controller(uint8_t maxBrightness) : Controller(cameras, 2, maxBrightness, 0){}
-uint8_t expression;
+ 
     void Initialize() override{
         leds.begin();
         leds.show();
@@ -61,38 +55,69 @@ uint8_t expression;
 
                 leds.setPixel(i + 346 * 4, camLeftPixels.GetColor(offset)->R, camLeftPixels.GetColor(offset)->G, camLeftPixels.GetColor(offset)->B);//Pin 7
                 leds.setPixel(i + 346 * 5, camRghtPixels.GetColor(i)->R, camRghtPixels.GetColor(i)->G, camRghtPixels.GetColor(i)->B);//Pin 8
-            }
-            else{
+            } else {
                 offset = i - 346;
 
                 leds.setPixel(i + 346 * 6 - 346, camLeftPixels.GetColor(offset)->R, camLeftPixels.GetColor(offset)->G, camLeftPixels.GetColor(offset)->B);//Pin 8
                 leds.setPixel(i + 346 * 7 - 346, camRghtPixels.GetColor(i)->R, camRghtPixels.GetColor(i)->G, camRghtPixels.GetColor(i)->B);//Pin 8
             }
         }
-bool bonk = APDS9960::isBooped();
-       expression = Menu::GetFaceState();
+
+        bool isBeingBooped = APDS9960::isBooped();
+        bool enableIndicator = !SerialSync::GetDead();
+        uint8_t currentExpression = Menu::GetFaceState();
+
+        if (enableIndicator) {
+            if (isBeingBooped == true){
+                leds.setPixel(0, 0, 10, 6); //aqua for boop
+            } else {
+                switch (currentExpression)
+                {
+                case 0:
+                    /* code */
+                    break;
+                
+                default:
+                    break;
+                }
+            }
+            /*
+             if (mode == 0) Default();
+            else if (mode == 1) Blushing();
+            else if (mode == 2) Surprised();
+            else if (mode == 3) BoopFace();
+            else if (mode == 4) Sad();
+            else if (mode == 5) Angry();
+            else if (mode == 6) SpectrumAnalyzerWithFace();
+            else if (mode == 7) SpectrumAnalyzerNoFace();
+            else Sleepy();
+            */
+            if (currentExpression == 0) {
+                leds.setPixel(0, 8, 7, 2); //yellow for happy
+            } else if (currentExpression == 1) {
+                leds.setPixel(0, 9, 3, 3); //lightpink blush
+            }else if (currentExpression == 2) {
+                leds.setPixel(0, 10, 0, 0); //red for angry
+            } else if (currentExpression == 3) {
+                leds.setPixel(0, 6, 3, 10); //purple for surprise
+            } else if (currentExpression == 4) {
+                leds.setPixel(0, 0, 2, 9); //blue for sad
+            } else if (currentExpression == 5) {
+                leds.setPixel(0, 0, 10, 0); //boop face
+            } else if (currentExpression == 6) {
+                leds.setPixel(0, 7, 0, 2); //bright pink for SA
+            } else if (currentExpression == 7) {
+                leds.setPixel(0, 9, 0, 9); //light pink for SA no face
+            } else if (currentExpression == 8) {
+                leds.setPixel(0, 0, 0, 2); //blue for sad
+            } else {
+                leds.setPixel(0, 26, 15, 0); //orange for error
+            }
         
-        if (bonk == true){
-            leds.setPixel(0, 0, 10, 6); //aqua for boop
-        } else if (expression == 0) {
-            leds.setPixel(0, 8, 7, 2); //yellow for happy
-        } else if (expression == 1) {
-            leds.setPixel(0, 10, 0, 0); //red for angry
-        } else if (expression == 2) {
-            leds.setPixel(0, 6, 3, 10); //purple for surprise
-        } else if (expression == 3) {
-            leds.setPixel(0, 0, 0, 8); //blue for sad
-        } else if (expression == 4) {
-            leds.setPixel(0, 0, 10, 0); //boop face
-        } else if (expression == 5) {
-            leds.setPixel(0, 7, 0, 2); //pink for SA
-        } else if (expression == 6) {
-            leds.setPixel(0, 9, 0, 9); //light pink for SA no face
-        } else if (expression == 7) {
-            leds.setPixel(0, 9, 0, 9); //light pink for SA no face
-        }else {
-            leds.setPixel(0, 9, 0, 9); //light pink for SA no face
+        } else {
+            leds.setPixel(0,0,0,0); //pixel off
         }
+
         leds.show();
     }
 

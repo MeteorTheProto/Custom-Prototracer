@@ -14,38 +14,6 @@ public:
     Angry,
     Surprise,
     Sad,
-    /*
-    b,
-    c,
-    */
-        /*
-        Frown,
-        Doubt,
-        Surprised,
-        Sadness,
-        Anger,
-        vrc_v_sil,
-        vrc_v_th,
-        vrc_v_nn,
-        vrc_v_ss,
-        vrc_v_rr,
-        vrc_v_dd,
-        vrc_v_kk,
-        vrc_v_ff,
-        vrc_v_pp,
-        vrc_v_ch,
-        vrc_v_ou,
-        vrc_v_oh,
-        vrc_v_ih,
-        vrc_v_ee,
-        vrc_v_aa,
-        LookDown,
-        LookUp,
-        Blink,
-        BiggerNose,
-        MoveEye,
-        HideBlush
-        */
     };
 
 private:

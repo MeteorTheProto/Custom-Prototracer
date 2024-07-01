@@ -22,6 +22,7 @@ public:
         Color
     };
 
+
 private:
     static const uint8_t menuCount = 9;
     static RainbowNoise material;
@@ -57,6 +58,17 @@ private:
     static String line1;
     static String line2;
 
+String menuList[9] = {
+        "Faces",
+        "Bright",
+        "AccentBright",
+        "Microphone",
+        "MicLevel",
+        "BoopSensor",
+        "SpectrumMirror",
+        "FaceSize",
+        "Color"
+    };
     static void SetMaxEntries(){
         MenuHandler<menuCount>::SetMenuMax(Faces, faceCount);
         MenuHandler<menuCount>::SetMenuMax(Bright, 10);
@@ -128,10 +140,22 @@ public:
         return &textEngine;
     }
 
-    static void SetCurrentMenu(uint8_t currentMenu){
+     static void SetCurrentMenu(uint8_t currentMenu){
         Menu::currentMenu = currentMenu;
+        
     }
+static void printMenu(){ //prints out the menu strings to serial
+    Serial.println(Menu::line1);
+    Serial.println(Menu::line2);
+}
+void printCurrentMenu() {
+    Serial.println("Current Menu is: "+menuList[currentMenu]);
+}
 
+static void printFaceState(){ //prints out the menu strings to serial
+    Serial.println(Menu::line1);
+    Serial.println(Menu::line2);
+}
     static void Update(float ratio){
         float target = 0.0f;
         float menuTarget = 0.0f;

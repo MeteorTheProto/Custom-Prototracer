@@ -12,53 +12,21 @@ public:
     enum Morphs {
     Default,
     MoveBlush,
-    /*
-    b,
-    c,
-    */
-        /*
-        Frown,
-        Doubt,
-        Surprised,
-        Sadness,
-        Anger,
-        vrc_v_sil,
-        vrc_v_th,
-        vrc_v_nn,
-        vrc_v_ss,
-        vrc_v_rr,
-        vrc_v_dd,
-        vrc_v_kk,
-        vrc_v_ff,
-        vrc_v_pp,
-        vrc_v_ch,
-        vrc_v_ou,
-        vrc_v_oh,
-        vrc_v_ih,
-        vrc_v_ee,
-        vrc_v_aa,
-        LookDown,
-        LookUp,
-        Blink,
-        BiggerNose,
-        MoveEye,
-        HideBlush
-        */
     };
 
 private:
 Vector3D basisVertices[12] = { 
     Vector3D(-22.6342f,120.6927f-20,95.4003f), //0
-        Vector3D(-15.7318f,136.4694f-20 ,95.4003f),
-        Vector3D(-6.3644f,137.4555f-20,95.4003f),
+    Vector3D(-15.7318f,136.4694f-20 ,95.4003f),
+    Vector3D(-6.3644f,137.4555f-20,95.4003f),
     Vector3D(-8.8295f,110.0926f-20,95.4003f),
     Vector3D(0.5380f,108.1205f-20,95.4003f),
-        Vector3D(3.4961f,136.2230f-20,95.4003f), //5
-        Vector3D(18.2869f,132.5253f-20,95.4003f),
+    Vector3D(3.4961f,136.2230f-20,95.4003f), //5
+    Vector3D(18.2869f,132.5253f-20,95.4003f),
     Vector3D(5.7147f,106.8880f-20,95.4003f),
     Vector3D(14.0962f,105.4089f-20,95.4003f),
-        Vector3D(27.1613f,128.8276f-20,95.4003f),
-        Vector3D(33.3241f,126.1159f-20,95.4003f), //10
+    Vector3D(27.1613f,128.8276f-20,95.4003f),
+    Vector3D(33.3241f,126.1159f-20,95.4003f), //10
     Vector3D(31.5985f,107.1345f-20,95.4003f),
 };
 IndexGroup basisIndexes[6] = {

@@ -5,9 +5,9 @@
 #include "EasyEaseAnimator.h"
 #include "..\Objects\Background.h"
 
+//face morph object includes
 #include "..\Morph\MeteorEye.h"
 #include "..\Morph\MeteorFace.h"
-
 #include "..\Morph\MeteorBrow.h"
 #include "..\Morph\MeteorBlush.h"
 
@@ -16,13 +16,11 @@
 #include "..\Signals\FunctionGenerator.h"
 #include "..\Menu\SingleButtonMenu.h"
 
+#include "..\Sensors\APDS9960.h"
 
-#include "..\Sensors\APDS9960sparkfun.h"
-//#include "..\Sensors\APDS9960.h"
-
-#include "..\Materials\Animated\SpectrumAnalyzer.h"
+#include "..\Materials\Animated\SpectrumAnalyzerMeteor.h"
 #include "..\Materials\Animated\RainbowNoise.h"
-#include "..\Materials\Animated\RainbowSpiral.h"
+#include "..\Materials\Animated\MeteorSpiral.h"
 
 #include "..\Materials\CombineMaterial.h"
 
@@ -34,6 +32,10 @@
 
 //#include "..\Flash\ImageSequences\VaporWave.h"
 
+//#include "..\Sensors\SerialSync.h"
+
+
+//#include "Sensors\SerialSync.h"
 #include "..\Sensors\SerialSync.h"
 
 
@@ -41,23 +43,47 @@
 class MeteorFaceAnimation : public Animation<5> {
 private:
 
+/**** creates the objects*/
+
+    /** full screen flat panel object */
     Background background;
+
+    /** mouth and nose object */
     MeteorFace face;
+
+    /** eye object */
     MeteorEye eye;
+
+    /** eyebrow object */
     MeteorBrow brow;
+
+    /** blush object */
     MeteorBlush blush;
     
     
    
+/**** animator objects */
 
+    /** face (mouth + nose) animator */
     EasyEaseAnimator<18> eEAface = EasyEaseAnimator<18>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
+
+    /** eye animator */
     EasyEaseAnimator<3> eEAeye = EasyEaseAnimator<3>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
+
+    /** brow animator */
     EasyEaseAnimator<5> eEAbrow = EasyEaseAnimator<5>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
+
+    /** blush animator */
     EasyEaseAnimator<4> eEAblush = EasyEaseAnimator<4>(EasyEaseInterpolation::Overshoot, 1.0f, 0.35f);
 
-    //Materials
+/**** Materials */
+
+    /** animated noise overlay/background (defined in RainbowNoise.h) */
     RainbowNoise rainbowNoise;
-    RainbowSpiral rainbowSpiral;
+
+    /** animated spiral/swirl of Meteor's horn colors (defined in MeteorSpiral.h) */
+    MeteorSpiral rainbowSpiral;
+
     SimpleMaterial redMaterial = SimpleMaterial(RGBColor(255,15,15));
     
     RGBColor gradientSpectrum[2] = {RGBColor(225, 225, 0), RGBColor(225, 225, 168)};
@@ -69,11 +95,14 @@ private:
     SimpleMaterial purple = SimpleMaterial(RGBColor(100, 0, 255));
     SimpleMaterial blue = SimpleMaterial(RGBColor(25,25,255));
     SimpleMaterial darkblue = SimpleMaterial(RGBColor(12,12,255));
+
+    /** creates a single material comprised of <n> layers */
     CombineMaterial<5> faceMaterial;
     
-    SpectrumAnalyzer sA = SpectrumAnalyzer(Vector2D(250, 200), Vector2D(120, 100), true, true);
-    //VaporWaveSequence gif = VaporWaveSequence(Vector2D(250, 200), Vector2D(120, 100), 30);
-    //Animation controllers
+    /* sets size & position of spectrum anylzer material (defined in SpectrumAnalyzerMeteor.h) */
+    SpectrumAnalyzerMeteor sA = SpectrumAnalyzerMeteor(Vector2D(250, 200), Vector2D(120, 100), true, true);
+
+    /*blink track */
     BlinkTrack<1> blink;
     //KeyFrameTrack blink = KeyFrameTrack( 0.0f, 1.0f, KeyFrameTrack::Cosine);
     //Animatio blink = KeyFrameTrack(1, 0.0f, 1.0f, 10, KeyFrameTrack::Cosine);
@@ -84,7 +113,9 @@ private:
     FunctionGenerator fGenMatXMove = FunctionGenerator(FunctionGenerator::Sine, -0.5f, 0.5f, 2.3f);
     FunctionGenerator fGenMatYMove = FunctionGenerator(FunctionGenerator::Sine, -0.5f, 0.5f, 3.7f);
 
-    APDS9960SPK boop;
+    APDS9960 boop;
+    Menu menuObj;
+    //SerialSync transfer;
     //SerialSync serialCom;
     float rainbowFaceMix = 0.0f;
     float angryFaceMix = 0.0f;
@@ -154,11 +185,13 @@ private:
         
     }
 
+/** links the blink morph to the blink frame track */
     void LinkParameters(){
         blink.AddParameter(eye.GetMorphWeightReference(MeteorEye::Blink));
         //blink.AddParameter(brow.GetMorphWeightReference(MeteorBrow::blink));
     }
 
+/** sets the interpolation method to either linear or cosine */
     void ChangeInterpolationMethods(){
         
         eEAblush.SetInterpolationMethod(MeteorBlush::MoveBlush, EasyEaseInterpolation::Cosine);
@@ -191,6 +224,7 @@ private:
         
     }
 
+/*** combines all the materials into one */
     void SetMaterials(){
         //faceMaterial.AddMaterial(Material::Add, &gradientMat, 0.5f);
         
@@ -221,9 +255,11 @@ private:
     */
 
 public:
+
     MeteorFaceAnimation() {
-        boop.Initialize(200);
-        Serial.print("boop init?");
+        boop.Initialize(600);
+        //SerialSync::Initialize();
+        //Serial.print("boop init?");
       scene.AddObject(background.GetObject());
       
       scene.AddObject(eye.GetObject());  
@@ -247,12 +283,18 @@ public:
        brow.GetObject()->SetMaterial(&faceMaterial);
         background.GetObject()->SetMaterial(&sA);
 
-        Menu::Initialize(8,0, 1000);//faces, pin, holding time
+       //Menu menuObj;
+       Menu::Initialize(9,0, 1000);//faces, pin, holding time
          //Menu::SetBrightness(8);
-        MicrophoneFourierIT::Initialize(A8, 8000, 50.0f, 82.5f);//8KHz sample rate, 50dB min, 120dB max (original)
+        MicrophoneFourier::Initialize(A8, 8000, 50.0f, 82.5f);//8KHz sample rate, 50dB min, 120dB max (original)
         
         //boop.Initialize(200);
-        //serialCom.Initialize();
+
+    //SerialSync transfer;
+      
+    
+        //SerialSync::SetDead(false);
+        //SerialSync::Send();
 
         
     }
@@ -270,29 +312,26 @@ uint8_t GetAccentBrightness(){
     }
 
     void Default(){
-        
-        //eEA.AddParameterFrame(Meteoreye::blink, 1.0f);
+
      eye.GetObject()->SetMaterial(&faceMaterial);
      face.GetObject()->SetMaterial(&faceMaterial);
      brow.GetObject()->SetMaterial(&faceMaterial);
      
      eEAblush.AddParameterFrame(MeteorBlush::MoveBlush, 1.0f);
      eEAblush.AddParameterFrame(MeteorBlush::Default, 0.0f);
-    blush.GetObject()->SetMaterial(&pink);
-    //eEA.AddParameterFrame(MeteorBlush::MoveBlush, 1.0f);
-     //eEA.AddParameterFrame(MeteorFace::BiggerNose, 1.0f);
+     blush.GetObject()->SetMaterial(&pink);
+
     }
 
     void Blushing(){
-        //eEA.AddParameterFrame(Meteoreye::blink, 1.0f);
+
      eye.GetObject()->SetMaterial(&faceMaterial);
      face.GetObject()->SetMaterial(&faceMaterial);
      brow.GetObject()->SetMaterial(&faceMaterial);
 
      eEAblush.AddParameterFrame(MeteorBlush::MoveBlush, 0.0f);
      blush.GetObject()->SetMaterial(&pink);
-     //eEA.AddParameterFrame(MeteorBlush::MoveBlush, 0.0f);
-     //eEA.AddParameterFrame(MeteorFace::BiggerNose, 1.0f);
+
     }
 
     void Angry(){
@@ -306,9 +345,7 @@ uint8_t GetAccentBrightness(){
     }
 
     void Sad(){
-        
-        //eEA.AddParameterFrame(MeteorBrow::Default, 1.0f);
-        //eEA.AddParameterFrame(MeteorFace::Frown, 1.0f);
+      
         eye.GetObject()->SetMaterial(&blue);
         face.GetObject()->SetMaterial(&blue);
         brow.GetObject()->SetMaterial(&blue);
@@ -318,20 +355,10 @@ uint8_t GetAccentBrightness(){
     }
 
     void BoopFace(){
-        //eEA.AddParameterFrame(MeteorBlush::MoveBlush, 0.0f);
-        //background.GetObject()->Enable();
         
-        //eEA.AddParameterFrame(MeteorFace::HideBlush, 0.0f);
-        //blush.GetObject()->Enable();
             eye.GetObject()->SetMaterial(&rainbowSpiral);
             face.GetObject()->SetMaterial(&rainbowSpiral);
             brow.GetObject()->SetMaterial(&rainbowSpiral);
-
-        //eEAbrow.AddParameterFrame(rainbowFaceIndex, 0.7f);
-        //eEAface.AddParameterFrame(angryFaceIndex, 0.7f);
-        //eEAeye.AddParameterFrame(angryFaceIndex, 0.7f);
-        //eEAblush.AddParameterFrame(angryFaceIndex, 0.7f);
-
 
         eEAface.AddParameterFrame(MeteorFace::Surprised, 1.0f);
         eEAbrow.AddParameterFrame(MeteorBrow::Surprise, 1.0f);
@@ -339,8 +366,7 @@ uint8_t GetAccentBrightness(){
 
     void Surprised(){
         
-        //eEA.AddParameterFrame(MeteorFace::HideBlush, 0.0f);
-        //eEA.AddParameterFrame(rainbowFaceIndex, 0.7f);
+       
         eye.GetObject()->SetMaterial(&purple);
         face.GetObject()->SetMaterial(&purple);
         brow.GetObject()->SetMaterial(&purple);
@@ -355,27 +381,23 @@ uint8_t GetAccentBrightness(){
         brow.GetObject()->SetMaterial(&darkblue);
         face.GetObject()->SetMaterial(&darkblue);
 
-        //blink.Pause();
+      
         eEAface.AddParameterFrame(MeteorFace::Doubt, 1.0f);
         eEAbrow.AddParameterFrame(MeteorBrow::Sad,0.8f);
-        //eEA.AddParameterFrame(Meteoreye::Closed, 0.9f);
-        //background.GetObject()->Enable();
-        //background.GetObject()->SetMaterial(&gif);
-        //gif.Update();
+        eEAeye.AddParameterFrame(MeteorEye::Closed, 0.9f);
+       
     }
     
     void Frown(){
-        //eEA.AddParameterFrame(MeteorFace::Frown, 1.0f);
-      
-
+       
     }
 
     void LookUp(){
-        //eEA.AddParameterFrame(MeteorFace::LookUp, 1.0f);
+
     }
 
     void LookDown(){
-        //eEA.AddParameterFrame(MeteorFace::LookDown, 1.0f);
+
     }
 
  void SpectrumAnalyzerWithFace(){
@@ -384,8 +406,7 @@ uint8_t GetAccentBrightness(){
         face.GetObject()->Enable();
         eye.GetObject()->Enable();
         brow.GetObject()->Enable();
-        //background.GetObject()->GetTransform()->SetPosition(Vector3D(0.0f/*fGenMatXMove.Update()*/,0.0f/* -15.0f /*fGenMatYMove.Update()*/, 100.0f));
-        //background.GetObject()->UpdateTransform();
+        
         eye.GetObject()->SetMaterial(&pink);
         face.GetObject()->SetMaterial(&pink);
         brow.GetObject()->SetMaterial(&pink);
@@ -416,10 +437,10 @@ uint8_t GetAccentBrightness(){
 
     void UpdateFFTVisemes(){
         if(Menu::UseMicrophone()){
-            eEAface.AddParameterFrame(MeteorFace::vrc_v_ss, MicrophoneFourierIT::GetCurrentMagnitude() / 2.0f);
+            eEAface.AddParameterFrame(MeteorFace::vrc_v_ss, MicrophoneFourier::GetCurrentMagnitude() / 2.0f);
 
-            if(MicrophoneFourierIT::GetCurrentMagnitude() > 0.05f){
-                voiceDetection.Update(MicrophoneFourierIT::GetFourierFiltered(), MicrophoneFourierIT::GetSampleRate());
+            if(MicrophoneFourier::GetCurrentMagnitude() > 0.05f){
+                voiceDetection.Update(MicrophoneFourier::GetFourierFiltered(), MicrophoneFourier::GetSampleRate());
         
                 eEAface.AddParameterFrame(MeteorFace::vrc_v_ee, voiceDetection.GetViseme(voiceDetection.EE));
                 eEAface.AddParameterFrame(MeteorFace::vrc_v_ih, voiceDetection.GetViseme(voiceDetection.IH));
@@ -435,7 +456,7 @@ uint8_t GetAccentBrightness(){
 
     void Update(float ratio) override {
 
-        //blink.Play();
+        
 
         face.Reset();
         face.GetObject()->Enable();
@@ -444,7 +465,7 @@ uint8_t GetAccentBrightness(){
         eye.Reset();
         eye.GetObject()->Enable();
 
-       blush.Reset();
+        blush.Reset();
         blush.GetObject()->Enable();
 
         brow.Reset();
@@ -453,32 +474,35 @@ uint8_t GetAccentBrightness(){
         background.GetObject()->Disable();
 
         bool isBooped = boop.isBooped();
-        uint8_t mode = Menu::GetFaceState();//change by button press
-        //serialCom.SetMode(mode);
-        //serialCom.Send();
-        //Serial.print("Sent!");
-        //Serial.println(mode);
+        uint8_t mode = Menu::GetFaceState();
+
+        //Menu::printMenu();
+        menuObj.printCurrentMenu();
+        
+        //change by button press
+       SerialSync::SetMode(mode);
 
 
-        MicrophoneFourierIT::Update();
-        sA.Update(MicrophoneFourierIT::GetFourierFiltered());
+        MicrophoneFourier::Update();
+        sA.Update(MicrophoneFourier::GetFourierFiltered());
         sA.SetHueAngle(ratio * 360.0f * 4.0f);
         sA.SetMirrorYState(true);
         sA.SetFlipYState(true);
         
         UpdateFFTVisemes();
 
-        if (isBooped && mode != 6){
+        if (isBooped && mode != (6||7)){
             BoopFace();
         }
         else {
             if (mode == 0) Default();
-            else if (mode == 1) Angry();
+            else if (mode == 1) Blushing();
             else if (mode == 2) Surprised();
-            else if (mode ==3) Sad();
-            else if (mode ==4) BoopFace();
-            else if (mode ==5) SpectrumAnalyzerWithFace();
-            else if (mode ==6) SpectrumAnalyzerNoFace();
+            else if (mode == 3) BoopFace();
+            else if (mode == 4) Sad();
+            else if (mode == 5) Angry();
+            else if (mode == 6) SpectrumAnalyzerWithFace();
+            else if (mode == 7) SpectrumAnalyzerNoFace();
             else Sleepy();
 
         }
@@ -494,7 +518,9 @@ uint8_t GetAccentBrightness(){
         eEAface.Update();
         eEAeye.Update();
         eEAbrow.Update();
-       eEAblush.Update();
+
+        eEAblush.Update();
+
         face.Update();
         eye.Update();
         brow.Update();
