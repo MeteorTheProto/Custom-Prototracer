@@ -1,1 +1,0 @@
-#define ltYellow 0

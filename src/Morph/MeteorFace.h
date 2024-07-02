@@ -10,11 +10,11 @@
 class MeteorFace{
 public:
     enum Morphs {
-        Frown,
-        Doubt,
-        Surprised,
-        Sadness,
-        Anger,
+        fFrown,
+        fDoubt,
+        fSurprised,
+        fSadness,
+        fAnger,
         vrc_v_sil,
         vrc_v_th,
         vrc_v_nn,
@@ -39,12 +39,12 @@ public:
         vrc_v_ih,
         vrc_v_ee,
         vrc_v_aa,
-        LookDown,
-        LookUp,
-        Blink,
-        BiggerNose,
-        MoveEye,
-        HideBlush
+        fLookDown,
+        fLookUp,
+        fBlink,
+        fBiggerNose,
+        fMoveEye,
+        fHideBlush
     };
 
 private:

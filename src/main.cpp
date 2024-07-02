@@ -44,7 +44,7 @@ ProtoDRController controller = ProtoDRController(maxBrightness, ProtoDRControlle
 #endif
 */
 //#include "Animation\protokitStandard.h"
-KaiborgV1D1Controller controller = KaiborgV1D1Controller(maxBrightness);
+MeteorV1D1Controller controller = MeteorV1D1Controller(maxBrightness);
 //ProtogenKitFaceAnimation animation = ProtogenKitFaceAnimation();
 
 
